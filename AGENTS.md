@@ -27,7 +27,8 @@ This repository contains the core of Home Assistant, a Python 3 based home autom
 ## Testing
 
 - Use `uv run pytest` to run tests
-- After modifying `strings.json` for an integration, regenerate the English translation file before running tests: `python3 -m script.translations develop --integration <integration_name>`. Tests load translations from the generated `translations/en.json`, not directly from `strings.json`.
+- Before running or generating any test that touches entity names/IDs or snapshots (not just after editing `strings.json`), regenerate the English translation file: `python3 -m script.translations develop --integration <integration_name>`. `translations/*` is gitignored and always built fresh (including in CI's "Compile English translations" step), so tests load from the generated `translations/en.json`, not `strings.json` — a snapshot or entity_id generated without this step can silently capture the wrong (untranslated fallback) entity naming.
+- `codecov/patch` coverage on new/changed lines targets `auto` (the file's existing baseline coverage) per `codecov.yml`, except for a fixed list of sensitive files (`config_flow.py`, `diagnostics.py`, etc.) which require 100%. Adding untested code to an already-well-covered file will fail this check — check `codecov.yml` and add tests for new code paths before opening the PR, not after CI flags it.
 - When writing or modifying tests, ensure all test function parameters have type annotations.
 - Prefer concrete types (for example, `HomeAssistant`, `MockConfigEntry`, etc.) over `Any`.
 - Prefer `@pytest.mark.usefixtures` over arguments, if the argument is not going to be used.
